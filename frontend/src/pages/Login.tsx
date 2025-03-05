@@ -1,15 +1,21 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import logo from '../assets/VoteChain.png'
+import { GoogleLogin } from "@react-oauth/google";
+
+import logo from "../assets/VoteChain.png";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-//   const handleLogin = (e) => {
-//     e.preventDefault();
-//     alert("Login clicked"); // Replace with actual authentication logic
-//   };
+  const handleLoginSuccess = (credentialResponse: any) => {
+    console.log("Google login successful:", credentialResponse);
+    // TODO: Process the credential, decode the JWT if needed, or send it to your backend
+  };
+
+  const handleLoginError = () => {
+    console.log("Google login failed");
+  };
 
   return (
     <div className="flex h-screen">
@@ -55,10 +61,15 @@ const Login = () => {
             {/* Remember Me & Forgot Password */}
             <div className="flex items-center justify-between text-sm text-gray-600">
               <label className="flex items-center space-x-2">
-                <input type="checkbox" className="h-4 w-4 text-[#3699E1] border-gray-300 rounded" />
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 text-[#3699E1] border-gray-300 rounded"
+                />
                 <span>Remember me</span>
               </label>
-              <Link to="/forgot-password" className="text-[#3699E1] hover:underline">Forgot Password?</Link>
+              <Link to="/forgot-password" className="text-[#3699E1] hover:underline">
+                Forgot Password?
+              </Link>
             </div>
 
             {/* Submit Button */}
@@ -73,15 +84,16 @@ const Login = () => {
           {/* Social Login */}
           <div className="flex items-center justify-between">
             <span className="h-px w-full bg-gray-300"></span>
-            <span className=" w-full text-sm text-gray-500">Or login with</span>
+            <span className="w-full text-sm text-gray-500">Or login with</span>
             <span className="h-px w-full bg-gray-300"></span>
           </div>
 
           <div className="flex flex-col gap-3">
-            <button className="flex items-center justify-center w-full rounded-lg border border-gray-300 py-2 text-gray-700 shadow-sm transition hover:bg-gray-100">
-              <img src="/google-icon.svg" alt="Google" className="mr-2 h-5 w-5" />
-              Sign in with Google
-            </button>
+            <GoogleLogin
+              onSuccess={handleLoginSuccess}
+              onError={handleLoginError}
+              auto_select={false}
+            />
           </div>
         </div>
       </div>
