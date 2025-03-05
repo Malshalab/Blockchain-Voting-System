@@ -4,11 +4,14 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Settings from "./pages/Settings";
 import Voting from "./pages/Voting";
+import Dashboard from "./pages/Dashboard"
+import Navbar from "./components/Navbar";
 
-const App = () => {
+function App() {
   return (
     <Router>
       <Routes>
+      <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/" element={<Home />} />
