@@ -16,6 +16,8 @@ app.use('/auth', authRoutes);
 const pollRoutes = require('./routes/pollRoutes');
 app.use('/polls', pollRoutes);
 
+
+
 const PORT = process.env.PORT || 5003;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
