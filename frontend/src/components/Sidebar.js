@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaBuilding, FaChartLine, FaUserCircle, FaSignOutAlt, FaSignInAlt } from "react-icons/fa";
 import VoteChainCircle from '../assets/VoteChainCircle.png'
 import { IoIosSettings } from "react-icons/io";
 
 const Sidebar = () => {
-  const [active, setActive] = useState("Polls");
+  const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
@@ -29,11 +29,10 @@ const Sidebar = () => {
               key={item.name}
               to={`${item.to}`}
               className={`flex items-center space-x-3 p-2 rounded-lg transition ${
-                active === item.name
+                location.pathname === item.to
                   ? "bg-purple-100 text-purple-700 font-semibold"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
-              onClick={() => setActive(item.name)}
             >
               <span className="text-lg">{item.icon}</span>
               <span>{item.name}</span>
