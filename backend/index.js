@@ -1,18 +1,22 @@
 const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const connectDB = require('./config/database');
+
+dotenv.config();
+connectDB();
 
 const app = express();
-
-// Middleware setup
 app.use(express.json());
-app.use(cors());
 
-// Basic Route
-app.get('/', (req, res) => {
-  res.send('Blockchain Voting System Backend Running!');
+// Mount auth routes
+const authRoutes = require('./routes/authRoutes');
+app.use('/auth', authRoutes);
+
+// Mount poll routes
+const pollRoutes = require('./routes/pollRoutes');
+app.use('/polls', pollRoutes);
+
+const PORT = process.env.PORT || 5003;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-// Server start
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
