@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaBuilding, FaChartLine, FaUserCircle, FaSignOutAlt, FaSignInAlt } from "react-icons/fa";
 import VoteChainCircle from '../assets/VoteChainCircle.png'
+import { IoIosSettings } from "react-icons/io";
 
 const Sidebar = () => {
   const [active, setActive] = useState("Polls");
@@ -9,8 +10,9 @@ const Sidebar = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { name: "Polls", icon: <FaBuilding /> },
-    { name: "Dashboard", icon: <FaChartLine /> },
+    { name: "Polls", to: '/', icon: <FaBuilding /> },
+    { name: "Dashboard", to: '/dashboard', icon: <FaChartLine /> },
+    { name: "Settings", to: '/settings', icon: <IoIosSettings /> },
   ];
 
   return (
@@ -25,7 +27,7 @@ const Sidebar = () => {
           {menuItems.map((item) => (
             <Link
               key={item.name}
-              to={`/${item.name.toLowerCase()}`}
+              to={`${item.to}`}
               className={`flex items-center space-x-3 p-2 rounded-lg transition ${
                 active === item.name
                   ? "bg-purple-100 text-purple-700 font-semibold"
