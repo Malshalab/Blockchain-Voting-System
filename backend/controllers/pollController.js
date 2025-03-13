@@ -1,6 +1,50 @@
 const Poll = require('../models/Polls');  // Adjusted to match the file name
 const jwt = require('jsonwebtoken');
 
+//Delete Poll
+const deletePoll= async (req,res) => {
+    try{
+        const pollTitle= req.query.title
+        if(!pollTitle){
+            return res.status(400).json({error:"enter a correct poll name"})
+        }
+
+        const wantedPoll = await Poll.findOneAndDelete({title: req.params.title})
+        if(!wantedPoll){
+            return res.status(404).json({error:"Poll not found"})
+        }
+        return res.status(200).json({ message: 'Poll successfully deleted', poll: deletedPoll });
+
+    } catch(error){
+        console.error('Error fetching polls:', error);
+        return res.status(500).json({ error: 'Server error.' });
+    }
+}
+
+// List all Polls/ find specific polls based on filer (GET)
+const listPolls = async (req, res) => {
+    try {
+      // Optionally filter polls by title using a query parameter
+      const filter = {};
+      if (req.query.title) {
+        filter.title = { $regex: req.query.title, $options: 'i' };
+      }
+
+      if (req.query.status) {
+        filter.status = req.query.status;
+      }
+      // Retrieve all polls (or filtered polls) from the database
+      const polls = await Poll.find(filter);
+      
+      // Return the polls in the response
+      return res.status(200).json({ polls });
+    } catch (error) {
+      console.error('Error fetching polls:', error);
+      return res.status(500).json({ error: 'Server error.' });
+    }
+  };
+  
+
 // Create Poll (POST)
 const createPoll = async (req, res) => {
   try {
@@ -54,4 +98,4 @@ const createPoll = async (req, res) => {
   }
 };
 
-module.exports = { createPoll };
+module.exports = { createPoll,listPolls, deletePoll };
