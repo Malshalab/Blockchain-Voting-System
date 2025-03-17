@@ -1,6 +1,18 @@
 const Poll = require('../models/Polls');  // Adjusted to match the file name
 const jwt = require('jsonwebtoken');
 
+// Update POLL (PUT/PATCH)
+const updatePoll = async(req,res) =>{
+    try{
+    const pollTitle=req.query.title
+    //find the entry I want to edit
+
+    }
+    catch(error){
+
+    }
+}
+
 //Delete Poll
 const deletePoll= async (req,res) => {
     try{
@@ -9,7 +21,7 @@ const deletePoll= async (req,res) => {
             return res.status(400).json({error:"enter a correct poll name"})
         }
 
-        const wantedPoll = await Poll.findOneAndDelete({title: req.params.title})
+        const wantedPoll = await Poll.findOneAndDelete({title: pollTitle})
         if(!wantedPoll){
             return res.status(404).json({error:"Poll not found"})
         }
@@ -98,4 +110,4 @@ const createPoll = async (req, res) => {
   }
 };
 
-module.exports = { createPoll,listPolls, deletePoll };
+module.exports = { createPoll,listPolls, deletePoll, updatePoll };

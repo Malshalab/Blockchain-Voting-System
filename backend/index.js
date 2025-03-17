@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const cors = require('cors'); // Import the cors package
 const connectDB = require('./config/database');
 
 dotenv.config();
@@ -15,7 +16,6 @@ app.use('/auth', authRoutes);
 // Mount poll routes
 const pollRoutes = require('./routes/pollRoutes');
 app.use('/polls', pollRoutes);
-
 
 
 const PORT = process.env.PORT || 5003;
