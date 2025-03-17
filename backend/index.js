@@ -9,6 +9,8 @@ connectDB();
 const app = express();
 app.use(express.json());
 
+app.use(cors()) ;
+
 // Mount auth routes
 const authRoutes = require('./routes/authRoutes');
 app.use('/auth', authRoutes);

@@ -1,21 +1,46 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
-
+import { loginUser } from '../api/auth';
 import logo from "../assets/VoteChain.png";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false); 
+    const [error, setError] = useState<string | null>(null);
 
     const handleLoginSuccess = (credentialResponse: any) => {
         console.log("Google login successful:", credentialResponse);
         // TODO: Process the credential, decode the JWT if needed, or send it to your backend
     };
 
+    const navigate = useNavigate(); // <-- Initialize useNavigate
+
+
     const handleLoginError = () => {
         console.log("Google login failed");
     };
+
+    // New submit handler using the login helper function
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        console.log("Email:", email, "Password:", password);
+        e.preventDefault(); // Prevent the form from reloading the page
+        setLoading(true);
+        setError(null);
+        try {
+        // Call the loginUser helper function with email and password
+        const data = await loginUser({ email, password });
+        console.log("Login successful:", data);
+        // Process the data, e.g., store the token in localStorage, update context, etc.
+        navigate("/"); // <-- Redirect to the home page
+
+        } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        setError(errorMessage);
+        }
+        setLoading(false);
+  };
 
     return (
         <div className="flex h-screen">
@@ -35,7 +60,8 @@ const Login = () => {
                     </p>
 
                     {/* Login Form */}
-                    <form className="space-y-4">
+                    
+                    <form className="space-y-4" onSubmit={handleSubmit}>
                         <div>
                             <input
                                 type="email"
