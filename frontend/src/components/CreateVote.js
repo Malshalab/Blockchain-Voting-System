@@ -1,5 +1,8 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect } from "react";
+import { createPoll, getPolls } from "../api/polls"; // Imported getPolls for listing polls
+import { useNavigate } from "react-router-dom";
+import logo from "../assets/VoteChain.png";
 
 const CreateVote = ({ isOpen, closeModal }) => {
     const [title, setTitle] = useState("");
@@ -9,6 +12,7 @@ const CreateVote = ({ isOpen, closeModal }) => {
     const [candidates, setCandidates] = useState([
         { id: 1, name: "", image: null },
     ]);
+    const [polls, setPolls] = useState([]); // NEW: State variable to store polls
 
     const candidatesPerColumn = 8;
     const numColumns = Math.ceil(candidates.length / candidatesPerColumn);
@@ -44,7 +48,7 @@ const CreateVote = ({ isOpen, closeModal }) => {
         setCandidates(candidates.filter((candidate) => candidate.id !== id));
     };
 
-    // Handle name change
+    // Handle candidate name change
     const handleCandidateChange = (id, newName) => {
         setCandidates(
             candidates.map((candidate) =>
@@ -73,25 +77,68 @@ const CreateVote = ({ isOpen, closeModal }) => {
         }
     };
 
-    // Submit vote creation
-    const handleCreateVote = () => {
+    // NEW: Function to fetch polls from the backend and update state
+    const fetchPolls = async () => {
+        try {
+            const data = await getPolls();
+            setPolls(data.polls); // Assume response returns { polls: [...] }
+        } catch (error) {
+            console.error("Error fetching polls:", error);
+        }
+    };
+
+    // NEW: useEffect to load polls when the component mounts
+    useEffect(() => {
+        fetchPolls();
+    }, []);
+
+    const handleCreateVote = async () => {
         if (!title || !description || !expiryDate || !expiryTime) {
             alert("Please fill in all required fields.");
             return;
         }
-
-        const newPoll = {
+    
+        // Combine expiryDate and expiryTime into an ISO-formatted string.
+        // Adjust this logic if your backend expects different fields (e.g., separate startTime and endTime)
+        const expiryISO = expiryDate + "T" + expiryTime + ":00Z";
+    
+        // Construct newPollData with all required fields.
+        // Map the candidates to match the expected "options" structure.
+        const newPollData = {
             title,
             description,
-            expiry: {
-                date: expiryDate,
-                time: expiryTime,
-            },
-            candidates,
+            startTime: expiryISO,
+            endTime: expiryISO, // For now, using the same value for both. Adjust if needed.
+            options: candidates.map((candidate) => ({
+                optionId: candidate.id.toString(), // Convert id to string
+                label: candidate.name,
+                image: candidate.image,
+            })),
+            status: "upcoming", // Default value
+            createdBy: "000000000000000000000000", // Dummy value for testing
         };
-
-        console.log("New Poll Created:", newPoll);
-        closeModal();
+    
+        try {
+            // Call the createPoll API helper with the newPollData
+            const response = await createPoll(newPollData);
+            console.log("Poll successfully created:", response);
+    
+            // Refresh the list of polls if needed (if getPolls is used to update UI)
+            await getPolls();
+    
+            // Optionally reset the form fields after successful creation
+            setTitle("");
+            setDescription("");
+            setExpiryDate("");
+            setExpiryTime("");
+            setCandidates([{ id: 1, name: "", image: null }]);
+    
+            // Close the modal after successful creation
+            closeModal();
+        } catch (error) {
+            console.error("Error during poll creation:", error);
+            alert("Error creating poll. Please try again.");
+        }
     };
 
     return (
@@ -119,14 +166,9 @@ const CreateVote = ({ isOpen, closeModal }) => {
                         leaveFrom="opacity-100 scale-100"
                         leaveTo="opacity-0 scale-95"
                     >
-                        <Dialog.Panel
-                            className={`w-full ${dialogWidthClass} bg-white rounded-lg shadow-xl p-6`}
-                        >
+                        <Dialog.Panel className={`w-full ${dialogWidthClass} bg-white rounded-lg shadow-xl p-6`}>
                             {/* Poll Title & Description */}
-                            <Dialog.Title
-                                as="h3"
-                                className="text-2xl font-semibold text-gray-800"
-                            >
+                            <Dialog.Title as="h3" className="text-2xl font-semibold text-gray-800">
                                 Create New Vote
                             </Dialog.Title>
                             <p className="text-sm text-gray-500">
@@ -146,9 +188,7 @@ const CreateVote = ({ isOpen, closeModal }) => {
                                     className="w-full p-3 border rounded-lg"
                                     placeholder="Poll Description"
                                     value={description}
-                                    onChange={(e) =>
-                                        setDescription(e.target.value)
-                                    }
+                                    onChange={(e) => setDescription(e.target.value)}
                                     required
                                 />
 
@@ -158,91 +198,58 @@ const CreateVote = ({ isOpen, closeModal }) => {
                                         type="date"
                                         className="w-1/2 p-3 border rounded-lg"
                                         value={expiryDate}
-                                        onChange={(e) =>
-                                            setExpiryDate(e.target.value)
-                                        }
+                                        onChange={(e) => setExpiryDate(e.target.value)}
                                         required
                                     />
                                     <input
                                         type="time"
                                         className="w-1/2 p-3 border rounded-lg"
                                         value={expiryTime}
-                                        onChange={(e) =>
-                                            setExpiryTime(e.target.value)
-                                        }
+                                        onChange={(e) => setExpiryTime(e.target.value)}
                                         required
                                     />
                                 </div>
                             </div>
+
+                            {/* Candidates Section */}
                             <div
                                 className="mt-6 grid gap-4"
                                 style={{
-                                    maxHeight:
-                                        candidates.length > 3
-                                            ? "250px"
-                                            : "auto",
-                                    overflowY:
-                                        candidates.length > 3
-                                            ? "auto"
-                                            : "visible",
+                                    maxHeight: candidates.length > 3 ? "250px" : "auto",
+                                    overflowY: candidates.length > 3 ? "auto" : "visible",
                                 }}
                             >
                                 {candidateColumns.map((column, colIndex) => (
                                     <div key={colIndex} className="space-y-3">
                                         {column.map((candidate) => (
-                                            <div
-                                                key={candidate.id}
-                                                className="flex items-center space-x-3 p-3 border rounded-lg"
-                                            >
+                                            <div key={candidate.id} className="flex items-center space-x-3 p-3 border rounded-lg">
                                                 {/* Candidate Image Upload */}
                                                 <input
                                                     type="file"
                                                     accept="image/*"
-                                                    onChange={(e) =>
-                                                        handleImageUpload(
-                                                            candidate.id,
-                                                            e
-                                                        )
-                                                    }
+                                                    onChange={(e) => handleImageUpload(candidate.id, e)}
                                                     className="hidden"
                                                     id={`upload-${candidate.id}`}
                                                 />
-                                                <label
-                                                    htmlFor={`upload-${candidate.id}`}
-                                                    className="cursor-pointer"
-                                                >
+                                                <label htmlFor={`upload-${candidate.id}`} className="cursor-pointer">
                                                     <img
-                                                        src={
-                                                            candidate.image ||
-                                                            "/placeholder.png"
-                                                        }
+                                                        src={candidate.image || "/placeholder.png"}
                                                         alt="Candidate"
                                                         className="w-10 h-10 rounded-full border-2"
                                                     />
                                                 </label>
-
                                                 {/* Candidate Name Input */}
                                                 <input
                                                     type="text"
                                                     className="flex-grow border p-2 rounded-lg"
                                                     placeholder="Candidate Name"
                                                     value={candidate.name}
-                                                    onChange={(e) =>
-                                                        handleCandidateChange(
-                                                            candidate.id,
-                                                            e.target.value
-                                                        )
-                                                    }
+                                                    onChange={(e) => handleCandidateChange(candidate.id, e.target.value)}
                                                 />
-
                                                 {/* Remove Candidate Button */}
                                                 {candidates.length > 1 && (
                                                     <button
-                                                        onClick={() =>
-                                                            removeCandidate(
-                                                                candidate.id
-                                                            )
-                                                        }
+                                                        onClick={() => removeCandidate(candidate.id)}
                                                         className="text-red-500 hover:text-red-700"
                                                     >
                                                         ✖
@@ -254,26 +261,33 @@ const CreateVote = ({ isOpen, closeModal }) => {
                                 ))}
                             </div>
 
-                            {/* Buttons */}
+                            {/* Action Buttons */}
                             <div className="mt-6 flex justify-between">
-                                <button
-                                    onClick={closeModal}
-                                    className="text-gray-600 hover:text-gray-900"
-                                >
+                                <button onClick={closeModal} className="text-gray-600 hover:text-gray-900">
                                     Cancel
                                 </button>
-                                <button
-                                    onClick={addCandidate}
-                                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition"
-                                >
+                                <button onClick={addCandidate} className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition">
                                     + Add Candidate
                                 </button>
-                                <button
-                                    onClick={handleCreateVote}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                                >
+                                <button onClick={handleCreateVote} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                                     Create Vote
                                 </button>
+                            </div>
+
+                            {/* Display Existing Polls */}
+                            <div className="mt-6">
+                                <h4 className="text-lg font-semibold">Existing Polls</h4>
+                                {polls.length === 0 ? (
+                                    <p>No polls found.</p>
+                                ) : (
+                                    <ul>
+                                        {polls.map((poll) => (
+                                            <li key={poll.id} className="border p-2 rounded-lg my-2">
+                                                <strong>{poll.title}</strong> - {poll.description}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
                             </div>
                         </Dialog.Panel>
                     </Transition.Child>

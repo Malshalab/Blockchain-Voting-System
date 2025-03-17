@@ -1,23 +1,46 @@
+
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import {registerUser } from '../api/auth';
 import logo from "../assets/VoteChain.png";
+
+
 
 const Register = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [loading, setLoading] = useState(false); 
+    const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate(); // <-- Initialize useNavigate
 
-    const handleRegister = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (password !== confirmPassword) {
-            alert("Passwords do not match!");
-            return;
-        }
-        console.log("Registering user:", { name, email, password });
-        // TODO: Send data to backend API for user registration
-    };
+
+     // New submit handler using the login helper function
+        const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+            console.log("Email:", email, "Password:", password);
+            e.preventDefault(); // Prevent the form from reloading the page
+            setLoading(true);
+            setError(null);
+            if (password !== confirmPassword) {
+                alert("Passwords do not match!");
+                return;
+            }
+            console.log("Registering user:", { name, email, password });
+            try {
+            // Call the loginUser helper function with email and password
+            const data = await registerUser({ name, email, password });
+            console.log("Registration successful:", data);
+            // Process the data, e.g., store the token in localStorage, update context, etc.
+            navigate("/"); // <-- Redirect to the home page
+    
+            } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            setError(errorMessage);
+            }
+            setLoading(false);
+      };
 
     return (
         <div className="flex h-screen">
@@ -37,7 +60,7 @@ const Register = () => {
                     </p>
 
                     {/* Register Form */}
-                    <form className="space-y-4" onSubmit={handleRegister}>
+                    <form className="space-y-4" onSubmit={handleSubmit}>
                         <div>
                             <input
                                 type="text"
