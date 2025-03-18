@@ -5,9 +5,12 @@ import { chunk } from "lodash"; // Import lodash for chunking
 const VoteModal = ({ isOpen, closeModal, poll }) => {
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const candidatesPerColumn = 8;
-    const candidateColumns = chunk(poll.candidates, candidatesPerColumn);
+    const candidateColumns = chunk(poll.options, candidatesPerColumn);
+    const [numColumns, setNumColumns] = useState(1); // Default to 3 columns
 
-    const numColumns = Math.min(3, Math.ceil(poll.candidates.length / 8)); // Max 3 columns
+    useEffect(() => {
+        setNumColumns( Math.min(3, Math.ceil(poll.options.length / 8)))
+    }, [poll]);
 
     const gridClass =
       numColumns === 1 ? "grid-cols-1" :
@@ -59,7 +62,7 @@ const VoteModal = ({ isOpen, closeModal, poll }) => {
                                 as="h3"
                                 className="text-2xl font-semibold text-gray-800"
                             >
-                                {poll.name}
+                                {poll.title}
                             </Dialog.Title>
                             <p className="text-sm text-gray-500">
                                 {poll.description}
@@ -77,8 +80,8 @@ const VoteModal = ({ isOpen, closeModal, poll }) => {
                                                 } hover:bg-gray-100 transition`}
                                                 onClick={() => setSelectedCandidate(candidate)}
                                             >
-                                                <img src={candidate.image} alt={candidate.name} className="w-10 h-10 rounded-full mr-3" />
-                                                <span className="text-gray-800">{candidate.name}</span>
+                                                <img src={candidate.image} alt={candidate.label} className="w-10 h-10 rounded-full mr-3" />
+                                                <span className="text-gray-800">{candidate.label}</span>
                                             </button>
                                         ))}
                                     </div>

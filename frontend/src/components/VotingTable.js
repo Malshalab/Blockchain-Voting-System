@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import VoteModal from "./VoteModal";
 import CreateVote from "./CreateVote";
@@ -8,6 +8,7 @@ const VotingTable = ({ title, data, isActive }) => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [createVote, setCreateVote] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const itemsPerPage = 9;
 
   const totalPages = Math.ceil(data.length / itemsPerPage);
@@ -26,14 +27,27 @@ const VotingTable = ({ title, data, isActive }) => {
     return new Date(endTime).toLocaleString();
   };
 
+    useEffect(() => {
+      const storedAdminStatus = localStorage.getItem("isAdmin");
+      console.log('admin status', storedAdminStatus);
+      if (storedAdminStatus === null) {
+          localStorage.setItem("isAdmin", "false");
+          setIsAdmin(false);
+      } else {
+          setIsAdmin(storedAdminStatus === "true");
+      }
+    }, [])
+
   return (
     <div className="bg-white shadow-lg rounded-b-lg rounded-r-lg p-6 h-full flex flex-col justify-between">
-      <button
-        onClick={() => setCreateVote(true)}
-        className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-3"
-      >
-        Create Poll
-      </button>
+      {isAdmin && (
+        <button
+          onClick={() => setCreateVote(true)}
+          className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition mb-3"
+        >
+          Create Poll
+        </button>
+      )}
       <div className="flex-grow overflow-auto">
         <table className="w-full border-collapse rounded-lg">
           <thead className="bg-gray-100 sticky top-0">
@@ -42,7 +56,6 @@ const VotingTable = ({ title, data, isActive }) => {
               <th className="p-3 text-left text-gray-600">Description</th>
               <th className="p-3 text-left text-gray-600">Options</th>
               <th className="p-3 text-left text-gray-600">Voters</th>
-              <th className="p-3 text-left text-gray-600">Status</th>
               <th className="p-3 text-left text-gray-600">Deadline</th>
               <th className="p-3 text-left text-gray-600">Members</th>
             </tr>
@@ -83,14 +96,6 @@ const VotingTable = ({ title, data, isActive }) => {
                     </span>
                     <span className="text-sm text-gray-400">Voters</span>
                   </div>
-                </td>
-                {/* Status */}
-                <td className="p-3">
-                  {isActive || poll.status === "active" ? (
-                    <span className="text-green-600 font-medium">✅ Valid</span>
-                  ) : (
-                    <span className="text-red-500 font-medium">❌ Not Valid</span>
-                  )}
                 </td>
                 {/* Deadline */}
                 <td className="p-3">
