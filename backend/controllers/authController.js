@@ -1,5 +1,5 @@
 const User = require('../models/User');  // Your user model (Mongoose model)
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // Register API Call

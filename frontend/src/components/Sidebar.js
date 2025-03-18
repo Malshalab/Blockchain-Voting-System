@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaBuilding, FaChartLine, FaUserCircle, FaSignOutAlt, FaSignInAlt } from "react-icons/fa";
 import VoteChainCircle from '../assets/VoteChainCircle.png'
 import { IoIosSettings } from "react-icons/io";
+import { isTokenValid } from "../utils/auth";
 
 const Sidebar = () => {
   const location = useLocation();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(isTokenValid());
   const navigate = useNavigate();
 
   const menuItems = [
@@ -14,6 +15,24 @@ const Sidebar = () => {
     { name: "Dashboard", to: '/dashboard', icon: <FaChartLine /> },
     { name: "Settings", to: '/settings', icon: <IoIosSettings /> },
   ];
+
+    useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isTokenValid()) {
+        localStorage.removeItem("token"); // Remove expired token
+        setIsLoggedIn(false);
+        navigate("/login"); // Redirect to login
+      }
+    }, 600000); // Check token validity every minute
+
+    return () => clearInterval(interval); // Cleanup interval on component unmount
+  }, []);
+
+    const handleLogout = () => {
+      localStorage.removeItem("token");
+      setIsLoggedIn(false);
+      navigate("/login");
+    };
 
   return (
     <div className="h-screen w-64 bg-white border-r shadow-lg fixed top-0 left-0 p-6 flex flex-col justify-between">
@@ -51,6 +70,7 @@ const Sidebar = () => {
               </div>
             </div>
             <button
+              onClick={handleLogout}
               className="mt-3 flex items-center space-x-2 bg-red-500 text-white px-4 py-2 w-full rounded-lg hover:bg-red-600 transition"
             >
               <FaSignOutAlt />
