@@ -9,7 +9,7 @@ const User = require('../models/User'); // Instead of '../backend/models/User'
 const updateExistingUsers = async () => {
   try {
     // This sets the 'isAdmin' field to false for all documents
-    const result = await User.updateMany({}, { $set: { isAdmin: false } });
+    const result = await User.updateMany({ walletAddress: { $exists: false } }, { $set: { walletAddress: null, isAdmin: false } });
     console.log("Update result:", result);
   } catch (error) {
     console.error("Error updating users:", error);

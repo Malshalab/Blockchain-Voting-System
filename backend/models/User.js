@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema({
   isAdmin: {
     type: Boolean,
     default: false
+  },
+  walletAddress: {
+    type: String,
+    required: false,
   }
   // add any other fields you need
 });
