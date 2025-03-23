@@ -35,3 +35,24 @@ export const loginUser = async(userData) => {
 
     return response.json() ;
 }
+
+export const verifyMessage = async(token, address, message, signature) => {
+
+    console.log("Token sent to backend:", token);
+
+    const response = await fetch('http://localhost:5003/auth/link-wallet', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({ address, message, signature }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Verification Failed');
+    }
+
+    return response.json();
+}

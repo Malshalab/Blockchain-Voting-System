@@ -13,6 +13,7 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
+    "ethers": "^6.13.5",
     "loadash": "^1.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

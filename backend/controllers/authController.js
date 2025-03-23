@@ -2,6 +2,50 @@ const User = require('../models/User');  // Your user model (Mongoose model)
 // const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+// For linking ETH wallet to user account
+const { ethers } = require('ethers');
+
+const linkWalletToUser = async (req, res) => {
+  const { address, message, signature } = req.body;
+
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Missing or invalid authorization header" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
+
+    // ✅ Verify signature
+    const recovered = ethers.verifyMessage(message, signature);
+    if (recovered.toLowerCase() !== address.toLowerCase()) {
+      return res.status(401).json({ error: "Signature does not match address" });
+    }
+
+    // ✅ Update user's wallet
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { walletAddress: address },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    return res.json({
+      success: true,
+      message: "Wallet linked successfully",
+      user: { id: user._id, walletAddress: user.walletAddress },
+    });
+
+  } catch (err) {
+    console.error("Wallet linking error:", err);
+    return res.status(500).json({ error: "Server error linking wallet" });
+  }
+};
+
 // Register API Call
 const register = async (req, res) => {
   try {
@@ -84,4 +128,4 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+module.exports = { register, login, linkWalletToUser };
