@@ -3,20 +3,35 @@ import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { loginUser } from '../api/auth';
 import logo from "../assets/VoteChain.png";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false); 
     const [error, setError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
 
     const handleLoginSuccess = (credentialResponse: any) => {
         console.log("Google login successful:", credentialResponse);
         // TODO: Process the credential, decode the JWT if needed, or send it to your backend
+        const decodedToken = JSON.parse(atob(credentialResponse.credential.split(".")[1])); 
+        const email = decodedToken.email;
+
+        console.log("email", email);
+ 
+        if (!email.endsWith("@torontomu.ca")) {
+            toast.error("Only @torontomu.ca emails are allowed to sign in.");
+            return;
+        }
+
+        // Still need to add the login api logic here
     };
 
-    const navigate = useNavigate(); // <-- Initialize useNavigate
+    const navigate = useNavigate();
 
+    const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
     const handleLoginError = () => {
         console.log("Google login failed");
@@ -32,9 +47,13 @@ const Login = () => {
         // Call the loginUser helper function with email and password
         const data = await loginUser({ email, password });
         console.log("Login successful:", data);
+        localStorage.setItem("token", data.token);
+        console.log('isAdmin', data.isAdmin);
+        localStorage.setItem("isAdmin", data.isAdmin);
         // Process the data, e.g., store the token in localStorage, update context, etc.
-        navigate("/"); // <-- Redirect to the home page
 
+        navigate("/"); // <-- Redirect to the home page
+        
         } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         setError(errorMessage);
@@ -75,7 +94,7 @@ const Login = () => {
                         <div>
                             <div className="relative">
                                 <input
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     className="mt-1 w-full rounded-2xl bg-[#F3F3F3] p-3"
                                     placeholder="Password"
                                     value={password}
@@ -84,8 +103,11 @@ const Login = () => {
                                     }
                                     required
                                 />
-                                <span className="absolute inset-y-0 right-3 flex items-center text-gray-500 cursor-pointer">
-                                    👁️
+                                <span
+                                    className="absolute inset-y-0 top-1 right-3 flex items-center text-gray-500 cursor-pointer"
+                                    onClick={togglePasswordVisibility}
+                                >
+                                    {showPassword ? <FaEyeSlash /> : <FaEye />}
                                 </span>
                             </div>
                         </div>
@@ -110,7 +132,7 @@ const Login = () => {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            className="w-full rounded-lg bg-[#3699E1] py-3 text-white transition-all hover:bg-[#287ab5] focus:ring-2 focus:ring-orange-300"
+                            className="w-full rounded-lg bg-[#3699E1] py-3 text-white transition-all hover:bg-[#287ab5]"
                         >
                             Sign In
                         </button>
