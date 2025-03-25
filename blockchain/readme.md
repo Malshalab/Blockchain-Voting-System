@@ -45,7 +45,7 @@ Copy the public key above and save it for later
 
 8. Start your bootnode:
 ```command-line//
-geth --datadir </path/to/data> --networkid <any-custom-network-id> --genesis </path/to/genesis.json> --bootnodes </path/to/bootnodes.json>
+geth --datadir </path/to/data> --networkid <any-custom-network-id> --genesis <path-to-genesis-file> --bootnodes <-path-to-bootnodes-file>
 ```
 In our case, our data directory is under this current directory, under the *data* folder. **Make sure not to add this to git**. We can run a node with the following command, assuming we are running this command from inside the project's root directory:
 ```command-line//
