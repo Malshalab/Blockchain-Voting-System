@@ -1,0 +1,6 @@
+{
+    "bootnodes" : [
+        "enode://<your-machine's-public-key-here>@<your-static-domain-here>",
+        "enode://<another-machine's-public-key-here>@<that-machine's-static-domain>"
+    ]
+}
