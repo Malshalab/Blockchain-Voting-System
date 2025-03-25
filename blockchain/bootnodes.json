@@ -1,6 +1,6 @@
 {
     "bootnodes" : [
-        "enode://<your-machine's-public-key-here>@<your-static-domain-here>",
+        "enode://fd3d7c65ad54e677a5d32657c55364d3a2dc55e1c7386ae24c8941fd44422db5da3b5fae884a5aafb3a2294292c017db689c7cea84ab23432aa75e3bf4398c80@tcp://0.tcp.ngrok.io:12980",
         "enode://<another-machine's-public-key-here>@<that-machine's-static-domain>"
     ]
 }
