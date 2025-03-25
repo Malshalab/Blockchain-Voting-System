@@ -19,7 +19,8 @@ geth --version
 ```command-line//
 geth account new --datadir <path-to-your-ethereum-acccount-data-directory>
 ```
-<!-- The keystore for your account will be in the directory above. **Make sure not to add it to git**. -->
+The keystore for your account will be in the directory above. **Make sure not to add it to git**.
+
 4. Start the Geth Console:
 ```command-line//
 geth --datadir <path-to-your-ethereum-acccount-data-directory> console
