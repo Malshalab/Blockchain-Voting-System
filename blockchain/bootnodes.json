@@ -1,6 +1,9 @@
 {
     "bootnodes" : [
-        "enode://fd3d7c65ad54e677a5d32657c55364d3a2dc55e1c7386ae24c8941fd44422db5da3b5fae884a5aafb3a2294292c017db689c7cea84ab23432aa75e3bf4398c80@tcp://0.tcp.ngrok.io:12980",
-        "enode://d54f75916d410d6ed90b01366500e33fb3becb226e7d464534b87e018500e525153ae433fab7fed08e1c05d04f5fb43d385515bde27f819f63e4397f807d47c5@tcp://8.tcp.ngrok.io:10410"
+        
+        "enode://0x1a66E3742EAEea085a7CD412F4F606EfE1e856b2@40.233.94.214:30303",
+        
+        "enode://0x7F0F22dB42A250B287FC8Bc9585c1011b53EE030@104.28.133.24:30303"
+
     ]
 }
