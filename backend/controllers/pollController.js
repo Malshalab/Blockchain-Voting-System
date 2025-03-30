@@ -48,8 +48,21 @@ const listPolls = async (req, res) => {
       // Retrieve all polls (or filtered polls) from the database
       const polls = await Poll.find(filter);
       
-      // Return the polls in the response
-      return res.status(200).json({ polls });
+      const now = new Date();
+
+      // Step 2: Check and update expired polls
+      const updatedPolls = await Promise.all(
+        polls.map(async (poll) => {
+          if (poll.status === "active" && new Date(poll.endTime) < now) {
+            poll.status = "ended";
+            await poll.save(); // Update DB
+          }
+          return poll;
+        })
+      );
+
+      // Step 3: Return the updated list
+      return res.status(200).json({ polls: updatedPolls });
     } catch (error) {
       console.error('Error fetching polls:', error);
       return res.status(500).json({ error: 'Server error.' });
@@ -77,7 +90,7 @@ const createPoll = async (req, res) => {
       options, 
       startTime, 
       endTime, 
-      status: "upcoming",
+      status: "active",
       createdBy: req.user ? req.user.id : "607f1f77bcf86cd799439011"
     });
 

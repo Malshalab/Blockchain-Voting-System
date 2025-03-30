@@ -15,6 +15,7 @@ export interface Poll {
   expiry: { time: string; date: string };
   isActive: boolean;
   members: string[];
+  status: "active" | "ended";
   voted?: boolean; // Optional, if you mark polls as voted
 }
 
@@ -57,9 +58,9 @@ const Home = () => {
   // Filter polls based on the current filter value
   let filteredPolls: Poll[] = polls;
   if (filter === "active") {
-    filteredPolls = polls.filter((poll) => poll.isActive);
+    filteredPolls = polls.filter((poll) => poll.status === "active");
   } else if (filter === "ended") {
-    filteredPolls = polls.filter((poll) => !poll.isActive);
+    filteredPolls = polls.filter((poll) => poll.status === "ended");
   } else if (filter === "voted") {
     filteredPolls = polls.filter((poll) => poll.voted);
   }

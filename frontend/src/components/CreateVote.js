@@ -97,24 +97,27 @@ const CreateVote = ({ isOpen, closeModal }) => {
             alert("Please fill in all required fields.");
             return;
         }
+
+        const startISO = new Date().toISOString();
     
         // Combine expiryDate and expiryTime into an ISO-formatted string.
         // Adjust this logic if your backend expects different fields (e.g., separate startTime and endTime)
-        const expiryISO = expiryDate + "T" + expiryTime + ":00Z";
+        const expiryLocal = new Date(`${expiryDate}T${expiryTime}`);
+        const expiryISO = expiryLocal.toISOString();
     
         // Construct newPollData with all required fields.
         // Map the candidates to match the expected "options" structure.
         const newPollData = {
             title,
             description,
-            startTime: expiryISO,
+            startTime: startISO,
             endTime: expiryISO, // For now, using the same value for both. Adjust if needed.
             options: candidates.map((candidate) => ({
                 optionId: candidate.id.toString(), // Convert id to string
                 label: candidate.name,
                 image: candidate.image,
             })),
-            status: "upcoming", // Default value
+            status: "active", // Default value
             createdBy: "000000000000000000000000", // Dummy value for testing
         };
     
@@ -169,7 +172,7 @@ const CreateVote = ({ isOpen, closeModal }) => {
                         <Dialog.Panel className={`w-full ${dialogWidthClass} bg-white rounded-lg shadow-xl p-6`}>
                             {/* Poll Title & Description */}
                             <Dialog.Title as="h3" className="text-2xl font-semibold text-gray-800">
-                                Create New Vote
+                                Create New Poll
                             </Dialog.Title>
                             <p className="text-sm text-gray-500">
                                 Set up a new poll by filling in the details.
@@ -270,12 +273,12 @@ const CreateVote = ({ isOpen, closeModal }) => {
                                     + Add Candidate
                                 </button>
                                 <button onClick={handleCreateVote} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                    Create Vote
+                                    Create Poll
                                 </button>
                             </div>
 
                             {/* Display Existing Polls */}
-                            <div className="mt-6">
+                            {/* <div className="mt-6">
                                 <h4 className="text-lg font-semibold">Existing Polls</h4>
                                 {polls.length === 0 ? (
                                     <p>No polls found.</p>
@@ -288,7 +291,7 @@ const CreateVote = ({ isOpen, closeModal }) => {
                                         ))}
                                     </ul>
                                 )}
-                            </div>
+                            </div> */}
                         </Dialog.Panel>
                     </Transition.Child>
                 </div>
