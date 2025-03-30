@@ -54,6 +54,9 @@ const Settings = () => {
         deleteAccount: false,
     });
 
+    const user = localStorage.getItem("user");
+    const userData = user ? JSON.parse(user) : null;
+
     // Ensure Type Safety for State Updates
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -109,8 +112,8 @@ const Settings = () => {
 
                                 {/* Username & Email */}
                                 <div className="flex">
-                                  <p className="font-bold text-xl">{settings.name}</p>
-                                  <span className="font-semibold text-lg">&nbsp;({settings.email})</span>
+                                  <p className="font-bold text-xl">{userData.name}</p>
+                                  <span className="font-semibold text-lg">&nbsp;({userData.email})</span>
                                 </div>
 
                                 {/* Change Password */}
@@ -148,7 +151,7 @@ const Settings = () => {
                                 <h2 className="text-xl font-semibold">Security & Privacy</h2>
                                 <div className="flex items-center justify-between">
                                     <span>Connected Wallet</span>
-                                    <button className="px-3 py-2 bg-blue-500 text-white rounded-lg">{settings.wallet}</button>
+                                    <button className="px-3 py-2 bg-blue-500 text-white rounded-lg">{userData.walletAddress}</button>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span>Delete Account</span>

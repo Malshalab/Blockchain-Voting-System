@@ -38,6 +38,10 @@ const VotingTable = ({ title, data, isActive }) => {
       }
     }, [])
 
+  useEffect(() => {
+    setCurrentPage(1); // Reset to first page when data changes
+  }, [data]);
+
   return (
     <div className="bg-white shadow-lg rounded-b-lg rounded-r-lg p-6 h-full flex flex-col justify-between">
       {isAdmin && (
@@ -65,7 +69,12 @@ const VotingTable = ({ title, data, isActive }) => {
               <tr
                 key={index}
                 className="border-b last:border-none hover:cursor-pointer"
-                onClick={() => setSelectedPoll(poll)}
+                onClick={() => {
+                  console.log("Poll clicked:", poll);
+                  if (poll.status !== "ended") {
+                    setSelectedPoll(poll)
+                  }
+                }}
               >
                 {/* Poll Title */}
                 <td className="p-3 flex flex-col">

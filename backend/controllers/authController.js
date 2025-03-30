@@ -120,7 +120,7 @@ const login = async (req, res) => {
 
     return res.status(200).json({
       token,
-      user: { id: user._id, email: user.email, isAdmin: user.isAdmin, walletAddress: user.walletAddress },
+      user: { id: user._id, name: user.name, email: user.email, isAdmin: user.isAdmin, walletAddress: user.walletAddress },
     });
   } catch (error) {
     console.error('Error during login:', error);

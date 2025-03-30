@@ -14,6 +14,8 @@ import {
   Line,
   Legend,
 } from "recharts";
+import Sidebar from "../components/Sidebar";
+import TopBar from "../components/TopBar";
 
 // Sample donut data
 const donutData = [
@@ -44,82 +46,17 @@ const requestTrendData = [
 
 const Dashboard: React.FC = () => {
   return (
-    <div className="min-h-screen flex bg-white text-gray-800">
+    <div className="min-h-screen flex bg-gray-100 text-gray-800">
       {/* SIDEBAR */}
-      <aside className="hidden md:flex flex-col w-20 xl:w-64 bg-white shadow-sm">
-        {/* Top Section: Logo / Brand */}
-        <div className="flex items-center justify-center xl:justify-start p-4 h-16 border-b border-gray-200">
-          {/* Replace with your logo or brand icon */}
-          <div className="w-8 h-8 bg-black rounded-full mr-0 xl:mr-2" />
-          <span className="hidden xl:inline-block font-bold text-lg">YourBrand</span>
-        </div>
-
-        {/* Navigation Links (dummy data) */}
-        <nav className="flex-1 flex flex-col p-4 space-y-4">
-          <button className="flex items-center space-x-2 text-gray-600 hover:text-black transition">
-            <div className="w-5 h-5 bg-gray-300 rounded" />
-            <span className="hidden xl:inline">Dashboard</span>
-          </button>
-          <button className="flex items-center space-x-2 text-gray-600 hover:text-black transition">
-            <div className="w-5 h-5 bg-gray-300 rounded" />
-            <span className="hidden xl:inline">Projects</span>
-          </button>
-          <button className="flex items-center space-x-2 text-gray-600 hover:text-black transition">
-            <div className="w-5 h-5 bg-gray-300 rounded" />
-            <span className="hidden xl:inline">Teams</span>
-          </button>
-          <button className="flex items-center space-x-2 text-gray-600 hover:text-black transition">
-            <div className="w-5 h-5 bg-gray-300 rounded" />
-            <span className="hidden xl:inline">Calendar</span>
-          </button>
-          <button className="flex items-center space-x-2 text-gray-600 hover:text-black transition">
-            <div className="w-5 h-5 bg-gray-300 rounded" />
-            <span className="hidden xl:inline">Reports</span>
-          </button>
-          <button className="flex items-center space-x-2 text-gray-600 hover:text-black transition">
-            <div className="w-5 h-5 bg-gray-300 rounded" />
-            <span className="hidden xl:inline">Settings</span>
-          </button>
-        </nav>
-
-        {/* Bottom Section: User Avatar */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-300 rounded-full" />
-            <div className="hidden xl:inline">
-              <p className="font-semibold">Username</p>
-              <p className="text-sm text-gray-500">View Profile</p>
-            </div>
-          </div>
-        </div>
-      </aside>
+      <Sidebar />
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 p-4 md:p-6">
+      <main className="ml-64 flex flex-col w-full h-full">
         {/* Header Row */}
-        <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between mb-6">
-          {/* Dashboard Title */}
-          <h1 className="text-2xl md:text-3xl font-bold mb-4 xl:mb-0">Dashboard</h1>
-
-          {/* Top Stats (aligned right on large screens) */}
-          <div className="flex items-center space-x-6">
-            {/* Stat 1 */}
-            <div className="text-right">
-              <p className="text-xl md:text-2xl font-bold">12K+</p>
-              <p className="text-sm text-gray-500">Creating and submitting your EOI</p>
-            </div>
-            {/* Divider */}
-            <div className="w-px h-6 bg-gray-300" />
-            {/* Stat 2 */}
-            <div className="text-right">
-              <p className="text-xl md:text-2xl font-bold">81%</p>
-              <p className="text-sm text-gray-500">Approval of new requests</p>
-            </div>
-          </div>
-        </div>
+        <TopBar title="Dashboard" />
 
         {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <div className="grid p-6 grid-cols-1 gap-6 xl:grid-cols-2">
           {/* LEFT COLUMN */}
           <div className="flex flex-col gap-6">
             {/* Borrowers by State (Donut Chart) */}

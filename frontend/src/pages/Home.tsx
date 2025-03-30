@@ -68,7 +68,7 @@ const Home = () => {
   return (
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
-      <div className="ml-64 flex flex-col w-full h-screen">
+      <div className="ml-64 flex flex-col w-full h-full">
         <TopBar title="Polling Dashboard" />
         <div className="flex flex-col flex-grow p-6 h-full">
           {/* Filter Tabs */}

@@ -9,6 +9,8 @@ const Sidebar = () => {
   const location = useLocation();
   const [isLoggedIn, setIsLoggedIn] = useState(isTokenValid());
   const navigate = useNavigate();
+  const user = localStorage.getItem("user");
+  const userData = user ? JSON.parse(user) : null; // Parse user data from localStorage
 
   const menuItems = [
     { name: "Polls", to: '/', icon: <FaBuilding /> },
@@ -66,7 +68,7 @@ const Sidebar = () => {
             <div className="flex items-center space-x-3">
               <FaUserCircle className="text-gray-700 text-3xl" />
               <div>
-                <p className="text-gray-800 font-semibold">Gianmarco</p>
+                <p className="text-gray-800 font-semibold">{userData.name}</p>
               </div>
             </div>
             <button

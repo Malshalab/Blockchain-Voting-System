@@ -48,8 +48,10 @@ const Login = () => {
         const data = await loginUser({ email, password });
         console.log("Login successful:", data);
         localStorage.setItem("token", data.token);
-        console.log('isAdmin', data.isAdmin);
-        localStorage.setItem("isAdmin", data.isAdmin);
+        console.log('isAdmin', data.user.isAdmin);
+        localStorage.setItem("isAdmin", data.user.isAdmin);
+        localStorage.setItem("walletAddress", data.user.walletAddress);
+        localStorage.setItem("user", JSON.stringify(data.user));
         // Process the data, e.g., store the token in localStorage, update context, etc.
 
         navigate("/"); // <-- Redirect to the home page
