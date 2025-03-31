@@ -4,33 +4,43 @@ pragma solidity ^0.8.0;
 contract DecentralizedVoting {
     address public admin;
     uint256 public pollCount;
+    uint256 public voteFee = 0.001 ether;
 
     struct Candidate {
-        uint256 id; // Unique identifier for the candidate
-        string name; // Candidate's name
-        uint256 voteCount; // Number of votes received
+        uint256 id;            // Candidate ID
+        string name;           // Candidate name
+        uint256 voteCount;     // Total votes received
     }
 
     struct Poll {
-        uint256 id; // Unique identifier for the poll
-        string title; // Title of the poll
-        uint256 startTime; // Poll start timestamp
-        uint256 endTime; // Poll end timestamp
-        bool active; // Status of the poll (active/inactive)
-        mapping(uint256 => Candidate) candidates; // Mapping of candidate ID to Candidate struct
-        uint256 candidateCount; // Number of candidates in the poll
-        mapping(address => bool) hasVoted; // Tracks if a voter has cast their vote
+        uint256 id;                            // Poll ID
+        string title;                          // Poll title
+        uint256 startTime;                     // Start timestamp
+        uint256 endTime;                       // End timestamp
+        bool active;                           // Poll status
+        mapping(uint256 => Candidate) candidates; // Mapping of candidate ID to candidate
+        uint256 candidateCount;                // Number of candidates
+        mapping(address => bool) hasVoted;     // Voter participation tracking
     }
 
     mapping(uint256 => Poll) public polls;
-    mapping(bytes32 => bool) public registeredVoters; // Stores hashed voter IDs
+    mapping(bytes32 => bool) public registeredVoters; // Registered voters by hashed ID
+    mapping(address => bool) public isValidator;      // Validator status mapping
 
     event PollCreated(uint256 pollId, string title, uint256 startTime, uint256 endTime);
     event CandidateAdded(uint256 pollId, uint256 candidateId, string name);
     event Voted(uint256 pollId, uint256 candidateId, address voter);
+    event ValidatorAdded(address validator);
+    event ValidatorRemoved(address validator);
+    event VoteFundsAllocated(address voter, address validator);
 
     modifier onlyAdmin() {
         require(msg.sender == admin, "Only admin can perform this action.");
+        _;
+    }
+
+    modifier onlyValidator() {
+        require(isValidator[msg.sender], "Only validators can perform this action.");
         _;
     }
 
@@ -47,8 +57,36 @@ contract DecentralizedVoting {
     }
 
     /**
-     * @notice Registers a voter using a cryptographic hash of their ID
-     * @param voterHash bytes32 - Hashed identifier of the voter
+     * @notice Adds a validator
+     * @param validator address - Ethereum address to mark as validator
+     */
+    function addValidator(address validator) public onlyAdmin {
+        isValidator[validator] = true;
+        emit ValidatorAdded(validator);
+    }
+
+    /**
+     * @notice Removes a validator
+     * @param validator address - Ethereum address to remove from validator list
+     */
+    function removeValidator(address validator) public onlyAdmin {
+        isValidator[validator] = false;
+        emit ValidatorRemoved(validator);
+    }
+
+    /**
+     * @notice Allocates vote fee funds to a voter
+     * @param voter address - Ethereum address of the voter
+     */
+    function allocateVoteFunds(address voter) public onlyValidator {
+        require(address(this).balance >= voteFee, "Insufficient contract balance");
+        payable(voter).transfer(voteFee);
+        emit VoteFundsAllocated(voter, msg.sender);
+    }
+
+    /**
+     * @notice Registers a voter by hashed ID
+     * @param voterHash bytes32 - Hashed voter ID
      */
     function registerVoter(bytes32 voterHash) public onlyAdmin {
         require(!registeredVoters[voterHash], "Voter already registered.");
@@ -56,10 +94,10 @@ contract DecentralizedVoting {
     }
 
     /**
-     * @notice Creates a new poll with the given title and time constraints
-     * @param title string - The title of the poll
-     * @param startTime uint256 - The timestamp when the poll starts
-     * @param endTime uint256 - The timestamp when the poll ends
+     * @notice Creates a new poll
+     * @param title string - Poll name/title
+     * @param startTime uint256 - Start time as Unix timestamp
+     * @param endTime uint256 - End time as Unix timestamp
      */
     function createPoll(string memory title, uint256 startTime, uint256 endTime) public onlyAdmin {
         require(startTime < endTime, "Invalid time range.");
@@ -77,9 +115,9 @@ contract DecentralizedVoting {
     }
 
     /**
-     * @notice Adds a candidate to an existing poll
-     * @param pollId uint256 - ID of the poll
-     * @param name string - Name of the candidate
+     * @notice Adds a candidate to a poll
+     * @param pollId uint256 - Poll ID to add candidate to
+     * @param name string - Candidate name
      */
     function addCandidate(uint256 pollId, string memory name) public onlyAdmin validPoll(pollId) {
         Poll storage poll = polls[pollId];
@@ -89,14 +127,15 @@ contract DecentralizedVoting {
     }
 
     /**
-     * @notice Allows a registered voter to cast a vote
+     * @notice Allows a registered voter to vote
      * @param pollId uint256 - ID of the poll
      * @param candidateId uint256 - ID of the candidate being voted for
-     * @param voterHash bytes32 - Hashed voter ID for verification
+     * @param voterHash bytes32 - Hashed voter ID
      */
-    function vote(uint256 pollId, uint256 candidateId, bytes32 voterHash) public validPoll(pollId) {
+    function vote(uint256 pollId, uint256 candidateId, bytes32 voterHash) public payable validPoll(pollId) {
         require(registeredVoters[voterHash], "Voter is not registered.");
         require(!polls[pollId].hasVoted[msg.sender], "You have already voted.");
+        require(msg.value == voteFee, "Incorrect vote fee amount.");
 
         Poll storage poll = polls[pollId];
         require(candidateId > 0 && candidateId <= poll.candidateCount, "Invalid candidate.");
@@ -104,15 +143,17 @@ contract DecentralizedVoting {
         poll.candidates[candidateId].voteCount++;
         poll.hasVoted[msg.sender] = true;
 
+        payable(msg.sender).transfer(msg.value); // Refund the voter
+
         emit Voted(pollId, candidateId, msg.sender);
     }
 
     /**
-     * @notice Retrieves the results of a poll
+     * @notice Returns poll results
      * @param pollId uint256 - ID of the poll
-     * @return title string - The title of the poll
-     * @return candidateIds uint256[] - Array of candidate IDs
-     * @return voteCounts uint256[] - Array of vote counts for each candidate
+     * @return title string - Poll title
+     * @return candidateIds uint256[] - List of candidate IDs
+     * @return voteCounts uint256[] - Corresponding vote counts
      */
     function getPollResults(uint256 pollId) public view returns (string memory, uint256[] memory, uint256[] memory) {
         require(polls[pollId].id != 0, "Poll does not exist.");
@@ -133,11 +174,14 @@ contract DecentralizedVoting {
     }
 
     /**
-     * @notice Deactivates a poll to prevent further voting
+     * @notice Deactivates a poll
      * @param pollId uint256 - ID of the poll
      */
     function deactivatePoll(uint256 pollId) public onlyAdmin {
         require(polls[pollId].id != 0, "Poll does not exist.");
         polls[pollId].active = false;
     }
+
+    // Fallback to receive ether for funding vote allocations
+    receive() external payable {}
 }
