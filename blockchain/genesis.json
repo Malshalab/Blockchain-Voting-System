@@ -6,19 +6,28 @@
     "eip150Block": 0,
     "eip155Block": 0,
     "eip158Block": 0,
-    "ibft2": {
-      "epoch": 999999999,
-      "blockperiodseconds": 12,
-      "validators": [
-        "0x7F642D1C9088429a7C3fa9dE7f8A4Ef321285FCe",  
-        "0xb28Ff9d7d2553afB3b20A10583eF1d7940DEe363"   
-      ]
-    }
+    "byzantiumBlock": 0,
+    "constantinopleBlock": 0,
+    "petersburgBlock": 0,
+    "istanbulBlock": 0,
+    "muirGlacierBlock": 0,
+    "berlinBlock": 0,
+    "londonBlock": 0,
+    "arrowGlacierBlock": 0,
+    "grayGlacierBlock": 0,
+    "ibft2Block": 0,
+    "terminalTotalDifficulty": "0x20000000000000",
+    "mergeNetsplitBlock": 0,
+    "terminalBlock": 0
   },
   "alloc": {
     "0x7F642D1C9088429a7C3fa9dE7f8A4Ef321285FCe": { "balance": "1000000000000000000000000000000" },  
     "0xb28Ff9d7d2553afB3b20A10583eF1d7940DEe363": { "balance": "1000000000000000000000000000000" }   
   },
   "difficulty": "0x20000",
-  "gasLimit": "0x8000000"
+  "gasLimit": "0x8000000",
+  "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "coinbase": "0x0000000000000000000000000000000000000000",
+  "timestamp": "0x00",
+  "nonce": "0x0000000000000042"
 }
