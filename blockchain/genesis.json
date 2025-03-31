@@ -1,33 +1,44 @@
-  {
+{
   "config": {
     "chainId": 8920,
-    "homesteadBlock": 0,
-    "daoForkBlock": 0,
-    "eip150Block": 0,
-    "eip155Block": 0,
-    "eip158Block": 0,
-    "byzantiumBlock": 0,
-    "constantinopleBlock": 0,
-    "petersburgBlock": 0,
-    "istanbulBlock": 0,
-    "muirGlacierBlock": 0,
     "berlinBlock": 0,
-    "londonBlock": 0,
-    "arrowGlacierBlock": 0,
-    "grayGlacierBlock": 0,
-    "ibft2Block": 0,
-    "terminalTotalDifficulty": 8589934592,   
-    "mergeNetsplitBlock": 0,
-    "terminalBlock": 0
+    "clique": {
+      "blockperiodseconds": 15,
+      "epochlength": 30000
+    }
   },
-  "alloc": {
-    "0x7F642D1C9088429a7C3fa9dE7f8A4Ef321285FCe": { "balance": "1000000000000000000000000000000" },  
-    "0xb28Ff9d7d2553afB3b20A10583eF1d7940DEe363": { "balance": "1000000000000000000000000000000" }   
-  },
-  "difficulty": "0x20000",
-  "gasLimit": "0x8000000",
-  "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
   "coinbase": "0x0000000000000000000000000000000000000000",
-  "timestamp": "0x00",
-  "nonce": "0x0000000000000042"
+  "difficulty": "0x1",
+  "extraData": "0x00000000000000000000000000000000000000000000000000000000000000001b9448014d24d93efd4cf7a3c562d4c465c10ecb000000000000000000000000000000000000000000000000000000000000000b7de1b70329c38c570a67ec0dc9c72fda6dd7fe20000000000000000000000000000000000000000000000000000000000000000cbb555b920e76530d4107af5e35adc7036880410",
+  "gasLimit": "0xa00000",
+  "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "nonce": "0x0",
+  "timestamp": "0x5c51a607",
+
+  "alloc": {
+    "0xNodeAddress1": {
+      "balance": "0x2386f26fc10000"  
+    },
+    "0xNodeAddress2": {
+      "balance": "0x2386f26fc10000"  
+    },
+    "0xNodeAddress3": {
+      "balance": "0x2386f26fc10000"  
+    }
+  },
+
+  "validators": [
+    {
+      "address": "0xNodeAddress1",
+      "enode": "enode://<Node1ID>@<Node1PublicIP>:30303"
+    },
+    {
+      "address": "0xNodeAddress2",
+      "enode": "enode://<Node2ID>@<Node2PublicIP>:30303"
+    },
+    {
+      "address": "0xNodeAddress3",
+      "enode": "enode://<Node3ID>@<Node3PublicIP>:30303"
+    }
+  ]
 }
