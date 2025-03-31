@@ -16,7 +16,7 @@
     "arrowGlacierBlock": 0,
     "grayGlacierBlock": 0,
     "ibft2Block": 0,
-    "terminalTotalDifficulty": "0x20000000000000",
+    "terminalTotalDifficulty": 0x20000000000000,  
     "mergeNetsplitBlock": 0,
     "terminalBlock": 0
   },
