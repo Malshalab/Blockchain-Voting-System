@@ -4,14 +4,14 @@
  * Checks if the user is authenticated by verifying that a JWT exists.
  */
 export const isAuthenticated = () => {
-    return !!localStorage.getItem("jwtToken");
+    return !!localStorage.getItem("token");
   };
   
   /**
    * Retrieves the stored JWT token.
    */
   export const getAuthToken = () => {
-    return localStorage.getItem("jwtToken");
+    return localStorage.getItem("token");
   };
   
   /**
@@ -19,14 +19,14 @@ export const isAuthenticated = () => {
    * @param {string} token - The JWT token to store.
    */
   export const setAuthToken = (token) => {
-    localStorage.setItem("jwtToken", token);
+    localStorage.setItem("token", token);
   };
   
   /**
    * Clears the stored JWT token.
    */
   export const clearAuthToken = () => {
-    localStorage.removeItem("jwtToken");
+    localStorage.removeItem("token");
   };
 
   export const isTokenValid = () => {

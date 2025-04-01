@@ -28,7 +28,7 @@ const VoteModal = ({ isOpen, closeModal, poll }) => {
     }
     try {
       // Retrieve the JWT token from localStorage
-      const token = localStorage.getItem("jwtToken");
+      const token = localStorage.getItem("token");
       if (!token) {
         alert("User not authenticated. Please log in.");
         return;
