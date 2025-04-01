@@ -1,5 +1,26 @@
 // This file contains helper functions for poll-related API calls
 
+export const voteOnPoll = async (pollId, candidateId, voterHash, token) => {
+    // pollId: the identifier of the poll
+    // candidateId: the identifier of the candidate being voted for
+    // voterHash: the hash of the voter's address (or any unique identifier)
+    console.log("Sending vote:", { pollId, candidateId, voterHash });
+    const response = await fetch('http://localhost:5003/polls/vote', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ pollId, candidateId, voterHash }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Vote casting failed');
+    }
+
+    return response.json();
+  }
+
 // Function to get a list of polls with optional filtering via query parameters
 export const getPolls = async (filters = {}) => {
     // Build query string from filters (e.g., { title: "favorite", status: "active" })

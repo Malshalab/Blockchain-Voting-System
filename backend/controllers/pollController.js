@@ -1,5 +1,37 @@
 const Poll = require('../models/Polls');  // Adjusted to match the file name
 const jwt = require('jsonwebtoken');
+const { contract } = require("../blockchainService"); // Adjusted to match the file name
+const { ethers } = require("ethers");
+
+const voteOnPoll = async (req, res) => {
+  try {
+    const { pollId, candidateId, voterHash } = req.body;
+
+    if (!pollId || !candidateId || !voterHash) {
+      return res.status(400).json({ error: 'Missing pollId, candidateId, or voterHash' });
+    }
+
+    // ✅ Convert pollId and candidateId to BigInt
+    const pollIdInt = BigInt(pollId);
+    const candidateIdInt = BigInt(candidateId);
+
+    // ✅ Hash the voter identifier (e.g. wallet address)
+    const voterHashBytes32 = ethers.keccak256(ethers.toUtf8Bytes(voterHash));
+
+    console.log("pollIdInt:", pollIdInt);
+    console.log("candidateIdInt:", candidateIdInt);
+    console.log("voterHashBytes32:", voterHashBytes32);
+    // Call the smart contract's vote method
+    const tx = await contract.vote(pollIdInt, candidateIdInt, voterHashBytes32);
+    await tx.wait(); // Wait for transaction to be mined
+
+    return res.status(200).json({ message: 'Vote cast successfully', txHash: tx.hash });
+  } catch (err) {
+    console.error('Vote Error (full):', JSON.stringify(err, Object.getOwnPropertyNames(err), 2));
+    return res.status(500).json({ error: 'Voting failed on server' });
+  }  
+};
+
 
 // Update POLL (PUT/PATCH)
 const updatePoll = async(req,res) =>{
@@ -83,6 +115,16 @@ const createPoll = async (req, res) => {
       return res.status(401).json({ error: "Poll already exists" });
     }
 
+    const startTimestamp = Math.floor(new Date(startTime).getTime() / 1000);
+    const endTimestamp = Math.floor(new Date(endTime).getTime() / 1000);
+
+    // 2. Create poll on the smart contract
+    const tx = await contract.createPoll(title, startTimestamp, endTimestamp);
+    await tx.wait(); // Wait for the transaction to be mined
+
+    const totalPolls = await Poll.countDocuments();
+    const pollNumber = totalPolls + 1;
+
     // Assume a default status and that createdBy is coming from authentication (or set a default)
     const newPoll = await Poll.create({ 
       title, 
@@ -91,7 +133,8 @@ const createPoll = async (req, res) => {
       startTime, 
       endTime, 
       status: "active",
-      createdBy: req.user ? req.user.id : "607f1f77bcf86cd799439011"
+      createdBy: req.user ? req.user.id : "607f1f77bcf86cd799439011",
+      pollNumber
     });
 
     const payload = { 
@@ -100,7 +143,8 @@ const createPoll = async (req, res) => {
       description: newPoll.description, 
       options: newPoll.options, 
       startTime: newPoll.startTime, 
-      endTime: newPoll.endTime 
+      endTime: newPoll.endTime,
+      pollNumber: newPoll.pollNumber,
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -115,6 +159,7 @@ const createPoll = async (req, res) => {
         options: newPoll.options,
         startTime: newPoll.startTime,
         endTime: newPoll.endTime,
+        pollNumber: newPoll.pollNumber,
       },
     });
   } catch (error) {
@@ -123,4 +168,4 @@ const createPoll = async (req, res) => {
   }
 };
 
-module.exports = { createPoll,listPolls, deletePoll, updatePoll };
+module.exports = { createPoll,listPolls, deletePoll, updatePoll, voteOnPoll };

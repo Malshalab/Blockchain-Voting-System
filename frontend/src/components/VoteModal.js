@@ -1,35 +1,62 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { chunk } from "lodash"; // Import lodash for chunking
+import { voteOnPoll } from "../api/polls";
+import { keccak256, toUtf8Bytes } from "ethers";
 
 const VoteModal = ({ isOpen, closeModal, poll }) => {
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const candidatesPerColumn = 8;
     const candidateColumns = chunk(poll.options, candidatesPerColumn);
     const [numColumns, setNumColumns] = useState(1); // Default to 3 columns
+    const [walletAddress, setWalletAddress] = useState("");
+    const token = localStorage.getItem("token");
 
     useEffect(() => {
-        setNumColumns( Math.min(3, Math.ceil(poll.options.length / 8)))
+        const savedWallet = localStorage.getItem("walletAddress");
+        if (savedWallet) {
+            setWalletAddress(savedWallet);
+        }
+    }, []);
+
+    useEffect(() => {
+        setNumColumns(Math.min(3, Math.ceil(poll.options.length / 8)));
     }, [poll]);
 
     const gridClass =
-      numColumns === 1 ? "grid-cols-1" :
-      numColumns === 2 ? "grid-cols-2" :
-      "grid-cols-3";
+        numColumns === 1
+            ? "grid-cols-1"
+            : numColumns === 2
+            ? "grid-cols-2"
+            : "grid-cols-3";
 
     const dialogWidthClass =
-  numColumns === 1 ? "max-w-md" :
-  numColumns === 2 ? "max-w-lg" :
-  "max-w-2xl"; // Default to 3+ columns
+        numColumns === 1
+            ? "max-w-md"
+            : numColumns === 2
+            ? "max-w-lg"
+            : "max-w-2xl"; // Default to 3+ columns
 
-      
-      const handleVote = () => {
-          if (!selectedCandidate) return alert("Please select a candidate!");
-          console.log(`Voted for: ${selectedCandidate.name}`);
-          closeModal(); // Close modal after vote
-      };
+    const handleVote = async () => {
+        console.log(selectedCandidate)
+        if (!selectedCandidate) return alert("Please select a candidate!");
 
-    console.log(gridClass)
+        if (!walletAddress) return alert("No wallet connected!");
+
+        const voterHash = keccak256(toUtf8Bytes(walletAddress));
+
+        const response = await voteOnPoll(
+            poll.pollNumber,
+            selectedCandidate.optionId,
+            voterHash,
+            token
+        );
+
+        console.log(`Voted for: ${selectedCandidate.name}`);
+        closeModal(); // Close modal after vote
+    };
+
+    console.log(gridClass);
 
     return (
         <Transition appear show={isOpen} as={Fragment}>
@@ -56,7 +83,9 @@ const VoteModal = ({ isOpen, closeModal, poll }) => {
                         leaveFrom="opacity-100 scale-100"
                         leaveTo="opacity-0 scale-95"
                     >
-                        <Dialog.Panel className={`w-full ${dialogWidthClass} bg-white rounded-lg shadow-xl p-6`}>
+                        <Dialog.Panel
+                            className={`w-full ${dialogWidthClass} bg-white rounded-lg shadow-xl p-6`}
+                        >
                             {/* Poll Title */}
                             <Dialog.Title
                                 as="h3"
@@ -76,12 +105,25 @@ const VoteModal = ({ isOpen, closeModal, poll }) => {
                                             <button
                                                 key={candidate.id}
                                                 className={`flex items-center w-full p-3 rounded-lg border ${
-                                                    selectedCandidate?.id === candidate.id ? "border-blue-500 bg-blue-100" : "border-gray-300"
+                                                    selectedCandidate?.id ===
+                                                    candidate.id
+                                                        ? "border-blue-500 bg-blue-100"
+                                                        : "border-gray-300"
                                                 } hover:bg-gray-100 transition`}
-                                                onClick={() => setSelectedCandidate(candidate)}
+                                                onClick={() =>
+                                                    setSelectedCandidate(
+                                                        candidate
+                                                    )
+                                                }
                                             >
-                                                <img src={candidate.image} alt={candidate.label} className="w-10 h-10 rounded-full mr-3" />
-                                                <span className="text-gray-800">{candidate.label}</span>
+                                                <img
+                                                    src={candidate.image}
+                                                    alt={candidate.label}
+                                                    className="w-10 h-10 rounded-full mr-3"
+                                                />
+                                                <span className="text-gray-800">
+                                                    {candidate.label}
+                                                </span>
                                             </button>
                                         ))}
                                     </div>

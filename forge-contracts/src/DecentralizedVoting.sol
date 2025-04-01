@@ -182,6 +182,24 @@ contract DecentralizedVoting {
         polls[pollId].active = false;
     }
 
+    function getPollSummary(uint256 pollId) public view returns (
+        string memory title,
+        uint256 startTime,
+        uint256 endTime,
+        bool active,
+        uint256 candidateCount
+    ) {
+        Poll storage poll = polls[pollId];
+        return (
+            poll.title,
+            poll.startTime,
+            poll.endTime,
+            poll.active,
+            poll.candidateCount
+        );
+    }
+
+
     // Fallback to receive ether for funding vote allocations
     receive() external payable {}
 }

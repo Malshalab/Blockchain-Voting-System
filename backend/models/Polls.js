@@ -31,7 +31,8 @@ const pollSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User', 
     required: true 
-  }
+  },
+  pollNumber: { type: Number, required: true, unique: true }
 }, { timestamps: true });
 
 // Specify the collection name "Polls" as the third argument.
