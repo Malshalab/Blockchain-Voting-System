@@ -1,62 +1,56 @@
-// routes/pollRoutes.js
-const express = require('express');
-const router = express.Router();
+const [selectedPoll, setSelectedPoll] = useState<Poll | null>(null);
+const [pollResults, setPollResults] = useState<number[]>([]);
 
-const { createPoll, listPolls, updatePoll, deletePoll } = require('../controllers/pollController');
+import { getPollVotesBackend } from "../api/polls";
 
-// Define a route for creating polls. This will be accessible at POST /polls/create if mounted correctly.
-router.post('/create', createPoll);
-router.get('/', listPolls)
-router.delete('/', deletePoll)
-router.put("/", updatePoll)
+const fetchPollResults = async (poll: Poll) => {
+  try {
+    const result = await getPollVotesBackend(poll.id);
+    setPollResults(result.votes.map(Number));
+  } catch (error) {
+    console.error("Error fetching poll results:", error);
+  }
+};
 
+/* Poll Results Section */
+<div className="bg-white rounded-xl shadow p-4 md:p-6">
+  <h3 className="text-lg md:text-xl font-semibold mb-4">Poll Results</h3>
+  <select
+    className="border border-gray-300 rounded p-2 mb-4 w-full"
+    onChange={(e) => {
+      const poll = polls.find(p => p.id === e.target.value);
+      setSelectedPoll(poll || null);
+      if (poll) fetchPollResults(poll);
+    }}
+  >
+    <option value="">Select a poll</option>
+    {polls.map((poll) => (
+      <option key={poll.id} value={poll.id}>
+        {poll.title}
+      </option>
+    ))}
+  </select>
 
-// Create poll on blockchain and then (optionally) update your DB accordingly.
-router.post('/createPollOnChain', async (req, res) => {
-    try {
-      const { question, options } = req.body;
-      if (!question || !options || options.length < 2) {
-        return res.status(400).json({ error: "Error: Title, options, and at least two options are required" });
-      }
-      
-      // Call the smart contract's createPoll function.
-      const tx = await votingContract.createPoll(question, options);
-      const receipt = await tx.wait();
-      
-      // Optionally, you can parse receipt events to get on-chain poll ID
-      console.log("Poll created on-chain, transaction hash:", receipt.transactionHash);
-      
-      // Here, you might update your database with on-chain details.
-      return res.status(201).json({
-        message: "Poll successfully registered on the blockchain",
-        transactionHash: receipt.transactionHash,
-        events: receipt.events
-      });
-    } catch (error) {
-      console.error("Error creating poll on blockchain:", error);
-      return res.status(500).json({ error: "Server error while creating poll on blockchain" });
-    }
-  });
-
-  router.post('/voteOnChain', async (req, res) => {
-    try {
-      const { pollId, optionIndex } = req.body;
-      if (pollId == null || optionIndex == null) {
-        return res.status(400).json({ error: "Poll ID and option index are required" });
-      }
-      
-      const tx = await votingContract.vote(pollId, optionIndex);
-      const receipt = await tx.wait();
-      console.log("Vote cast on-chain, transaction hash:", receipt.transactionHash);
-      return res.status(200).json({
-        message: "Vote successfully cast on the blockchain",
-        transactionHash: receipt.transactionHash,
-        events: receipt.events
-      });
-    } catch (error) {
-      console.error("Error casting vote on blockchain:", error);
-      return res.status(500).json({ error: "Server error while casting vote on blockchain" });
-    }
-  });
-
-module.exports = router;
+  {selectedPoll && pollResults.length > 0 && (
+    <ResponsiveContainer width="100%" height={300}>
+      <PieChart>
+        <Pie
+          data={selectedPoll.voteCounts.map((count, index) => ({
+            name: `Option ${index + 1}`,
+            value: pollResults[index],
+          }))}
+          dataKey="value"
+          nameKey="name"
+          outerRadius={100}
+          fill="#8884d8"
+          label
+        >
+          {pollResults.map((_, index) => (
+            <Cell key={`cell-${index}`} fill={donutColors[index % donutColors.length]} />
+          ))}
+        </Pie>
+        <Tooltip />
+      </PieChart>
+    </ResponsiveContainer>
+  )}
+</div>

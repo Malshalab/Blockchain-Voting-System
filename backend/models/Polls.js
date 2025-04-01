@@ -1,3 +1,4 @@
+// models/Polls.js
 const mongoose = require('mongoose');
 
 const pollSchema = new mongoose.Schema({
@@ -26,13 +27,21 @@ const pollSchema = new mongoose.Schema({
   status: { 
     type: String, 
     required: true 
-  }, // e.g., "upcoming", "active", "closed"
+  }, // e.g., "active", "upcoming", "closed"
   createdBy: { 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User', 
     required: true 
+  },
+  pollNumber: { 
+    type: Number, 
+    unique: true, 
+    default: null 
+  },
+  onChainPollId: { 
+    type: Number, 
+    required: false  // Change this to false
   }
 }, { timestamps: true });
 
-// Specify the collection name "Polls" as the third argument.
 module.exports = mongoose.model('Poll', pollSchema, 'Polls');

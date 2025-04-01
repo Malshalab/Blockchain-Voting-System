@@ -113,21 +113,60 @@ export const voteOnPoll = async (pollId, optionIndex, token) => {
 };
 
 // src/api/polls.js
-export const voteOnPollBackend = async (pollId, optionIndex, token) => {
-  const response = await fetch('http://localhost:5003/polls/vote', {
-    method: 'POST',
+export const voteOnPollBackend = async (pollOnChainId, optionIndex, token) => {
+  const response = await fetch("http://localhost:5003/polls/voteOnChain", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      // Include the JWT token in the Authorization header if required by your backend
-      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({ pollId, optionIndex }),
+    body: JSON.stringify({ pollId: pollOnChainId, optionIndex })
   });
-
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.error || 'Voting failed');
+    throw new Error(errorData.error || "Voting failed");
   }
+  return response.json();
+};
 
+// frontend/src/api/polls.js
+export const createPollOnChainBackend = async (pollData, token) => {
+  const response = await fetch("http://localhost:5003/polls/createPollOnChain", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      question: pollData.title,
+      description: pollData.description,
+      startTime: pollData.startTime,
+      endTime: pollData.endTime,
+      options: pollData.options.map(opt => opt.label), // assuming your blockchain expects an array of strings
+      status: pollData.status,
+      createdBy: pollData.createdBy
+    }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Poll creation failed");
+  }
+  return response.json();
+};
+
+// src/api/polls.js
+export const getPollVotesBackend = async (pollId) => {
+  const response = await fetch(`http://localhost:5003/polls/getPollVotes/${pollId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      // Add Authorization header if needed:
+      // Authorization: `Bearer ${localStorage.getItem("token")}`
+    },
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to get poll votes");
+  }
   return response.json();
 };

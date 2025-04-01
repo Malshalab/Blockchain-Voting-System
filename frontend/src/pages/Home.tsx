@@ -1,34 +1,39 @@
+// src/pages/Home.tsx
 import React, { useState, useEffect } from "react";
 import Sidebar from "../components/Sidebar";
 import TopBar from "../components/TopBar";
 import VotingTable from "../components/VotingTable";
 import { getPolls } from "../api/polls";
 
-// Define a type for your poll (adjust fields as needed)
+// Update the Poll interface to reflect the backend schema.
 export interface Poll {
-  id: number;
-  name: string;
-  description: string;
-  address: string;
-  candidates?: { id: string; name: string; image: string }[]; // Made optional in case it's missing
-  voters: number;
-  expiry: { time: string; date: string };
-  isActive: boolean;
-  members: string[];
-  status: "active" | "ended";
-  voted?: boolean; // Optional, if you mark polls as voted
+  _id: string;                   // MongoDB document ID
+  title: string;                 // Poll title
+  description: string;           // Poll description
+  options: {
+    optionId: string;            // Option ID (string version of index)
+    label: string;               // Option label
+    _id?: string;                // Option's Mongo ID (optional)
+  }[];
+  startTime: string;             // ISO date string for poll start time
+  endTime: string;               // ISO date string for poll end time
+  status: "active" | "ended";    // Poll status
+  createdBy: string;             // User ID of the poll creator
+  pollNumber: number;            // Unique poll number
+  onChainPollId: number;         // Poll ID from the blockchain
+  // Optionally, add other fields (e.g., voters count, members, voted flag) as needed
 }
 
 const Home = () => {
   // State for polls (array)
   const [polls, setPolls] = useState<Poll[]>([]);
-  // State for the current filter and active tab
+  // State for current filter and active tab
   const [filter, setFilter] = useState<"all" | "active" | "ended" | "voted">("all");
   const [activeTab, setActiveTab] = useState<"all" | "active" | "ended" | "voted">("all");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
 
-  // Using as const so that TS infers literal types for the value field
+  // Define filter tabs
   const tabs = [
     { name: "All Polls", value: "all" },
     { name: "Active", value: "active" },
@@ -42,7 +47,7 @@ const Home = () => {
       try {
         const data = await getPolls();
         console.log("Polls data:", data);
-        // If the API response is an array, set it directly; otherwise, use the nested polls property
+        // Assuming the API response returns { polls: [...] }
         setPolls(Array.isArray(data) ? data : data.polls);
       } catch (err) {
         console.error("Error fetching polls:", err);
@@ -55,14 +60,16 @@ const Home = () => {
     fetchPolls();
   }, []);
 
-  // Filter polls based on the current filter value
+  // Filter polls based on the current filter value.
+  // (If your backend doesn't send a "voted" flag, adjust or remove that filter.)
   let filteredPolls: Poll[] = polls;
   if (filter === "active") {
     filteredPolls = polls.filter((poll) => poll.status === "active");
   } else if (filter === "ended") {
     filteredPolls = polls.filter((poll) => poll.status === "ended");
   } else if (filter === "voted") {
-    filteredPolls = polls.filter((poll) => poll.voted);
+    // Adjust this logic based on your backend data if needed.
+    filteredPolls = polls.filter((poll) => (poll as any).voted);
   }
 
   return (

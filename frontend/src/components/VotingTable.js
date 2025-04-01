@@ -1,3 +1,4 @@
+// src/components/VotingTable.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import VoteModal from "./VoteModal";
@@ -23,23 +24,21 @@ const VotingTable = ({ title, data, isActive }) => {
     if (endTime.$date && endTime.$date.$numberLong) {
       return new Date(Number(endTime.$date.$numberLong)).toLocaleString();
     }
-    // Otherwise, assume it's a date string or a valid date
     return new Date(endTime).toLocaleString();
   };
 
-    useEffect(() => {
-      const storedAdminStatus = localStorage.getItem("isAdmin");
-      console.log('admin status', storedAdminStatus);
-      if (storedAdminStatus === null) {
-          localStorage.setItem("isAdmin", "false");
-          setIsAdmin(false);
-      } else {
-          setIsAdmin(storedAdminStatus === "true");
-      }
-    }, [])
+  useEffect(() => {
+    const storedAdminStatus = localStorage.getItem("isAdmin");
+    if (storedAdminStatus === null) {
+      localStorage.setItem("isAdmin", "false");
+      setIsAdmin(false);
+    } else {
+      setIsAdmin(storedAdminStatus === "true");
+    }
+  }, []);
 
   useEffect(() => {
-    setCurrentPage(1); // Reset to first page when data changes
+    setCurrentPage(1);
   }, [data]);
 
   return (
@@ -67,50 +66,36 @@ const VotingTable = ({ title, data, isActive }) => {
           <tbody>
             {currentData.map((poll, index) => (
               <tr
-                key={index}
+                key={poll._id} // Use a unique ID from the poll document
                 className="border-b last:border-none hover:cursor-pointer"
                 onClick={() => {
                   console.log("Poll clicked:", poll);
                   if (poll.status !== "ended") {
-                    setSelectedPoll(poll)
+                    setSelectedPoll(poll);
                   }
                 }}
               >
-                {/* Poll Title */}
-                <td className="p-3 flex flex-col">
-                  <span className="font-medium">
-                    {poll.title || "Untitled Poll"}
-                  </span>
-                </td>
-                {/* Description */}
                 <td className="p-3">
-                  <span className="text-sm text-gray-400">
-                    {poll.description || "No description"}
-                  </span>
+                  <span className="font-medium">{poll.title || "Untitled Poll"}</span>
                 </td>
-                {/* Options */}
+                <td className="p-3">
+                  <span className="text-sm text-gray-400">{poll.description || "No description"}</span>
+                </td>
                 <td className="p-3">
                   <div className="flex flex-col">
-                    <span className="font-medium">
-                      {(poll.options || []).length}
-                    </span>
+                    <span className="font-medium">{(poll.options || []).length}</span>
                     <span className="text-sm text-gray-400">Options</span>
                   </div>
                 </td>
-                {/* Voters */}
                 <td className="p-3">
                   <div className="flex flex-col">
-                    <span className="font-medium">
-                      {poll.voters !== undefined ? poll.voters : "N/A"}
-                    </span>
+                    <span className="font-medium">{poll.voters !== undefined ? poll.voters : "N/A"}</span>
                     <span className="text-sm text-gray-400">Voters</span>
                   </div>
                 </td>
-                {/* Deadline */}
                 <td className="p-3">
                   <span className="block">{formatDeadline(poll.endTime)}</span>
                 </td>
-                {/* Members (if applicable) */}
                 <td className="p-3">
                   <div className="flex -space-x-2">
                     {(poll.members || []).length > 0 ? (

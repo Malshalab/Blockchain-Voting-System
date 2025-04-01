@@ -1,9 +1,10 @@
+// src/components/VoteModal.js
 import React, { useState, useEffect, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { chunk } from "lodash";
-import { voteOnPollBackend } from "../api/polls"; // Ensure this path is correct
+import { voteOnPollBackend } from "../api/polls"; // Ensure the path is correct
 
-const VoteModal = ({ isOpen, closeModal, poll }) => {
+const VoteModal = ({ isOpen, closeModal, poll, onVoteSuccess }) => {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const candidatesPerColumn = 8;
   const candidateColumns = chunk(poll.options, candidatesPerColumn);
@@ -21,23 +22,35 @@ const VoteModal = ({ isOpen, closeModal, poll }) => {
     numColumns === 1 ? "max-w-md" :
     numColumns === 2 ? "max-w-lg" : "max-w-2xl";
 
-  const handleVote = async () => {
+  // Inside handleVote in VoteModal.js
+const handleVote = async () => {
     if (!selectedCandidate) {
       alert("Please select a candidate!");
       return;
     }
     try {
-      // Retrieve the JWT token from localStorage
+      // Retrieve the JWT token from localStorage using the correct key
       const token = localStorage.getItem("token");
       if (!token) {
         alert("User not authenticated. Please log in.");
         return;
       }
-      // Call the backend vote endpoint. Assume poll.id exists and candidate has an id.
-      const result = await voteOnPollBackend(poll.id, selectedCandidate.id, token);
+      
+      // Use the onChainPollId from the poll data
+      const pollId = poll.onChainPollId;
+      // Convert candidate's optionId (assumed 1-based) to a 0-based index:
+      const optionIndex = selectedCandidate.optionId ? parseInt(selectedCandidate.optionId, 10) - 1 : null;
+      
+      if (!pollId || optionIndex === null || isNaN(optionIndex)) {
+        throw new Error("Poll ID and option index are required");
+      }
+      
+      const result = await voteOnPollBackend(pollId, optionIndex, token);
       console.log("Vote successfully cast:", result);
       alert("Vote successfully cast!");
       closeModal();
+      
+      if (onVoteSuccess) onVoteSuccess();
     } catch (error) {
       console.error("Error casting vote:", error);
       alert("Error casting vote. Please try again.");
@@ -58,6 +71,7 @@ const VoteModal = ({ isOpen, closeModal, poll }) => {
         >
           <div className="fixed inset-0 bg-black bg-opacity-50" />
         </Transition.Child>
+
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Transition.Child
             as={Fragment}
@@ -74,6 +88,7 @@ const VoteModal = ({ isOpen, closeModal, poll }) => {
                 {poll.title}
               </Dialog.Title>
               <p className="text-sm text-gray-500">{poll.description}</p>
+
               {/* Candidate List */}
               <div className={`mt-4 grid ${gridClass} gap-4`}>
                 {candidateColumns.map((column, colIndex) => (
@@ -99,6 +114,7 @@ const VoteModal = ({ isOpen, closeModal, poll }) => {
                   </div>
                 ))}
               </div>
+
               {/* Action Buttons */}
               <div className="mt-6 flex justify-between">
                 <button onClick={closeModal} className="text-gray-600 hover:text-gray-900">
