@@ -1,14 +1,35 @@
-export const isTokenValid = (): boolean => {
-    const token = localStorage.getItem("token");
+// frontend/src/utils/auth.js
 
-    if (!token) return false; // No token = Not logged in
+/**
+ * Checks if the user is authenticated by verifying that a JWT exists.
+ */
+export const isAuthenticated = () => {
+    return !!localStorage.getItem("jwtToken");
+  };
+  
+  /**
+   * Retrieves the stored JWT token.
+   */
+  export const getAuthToken = () => {
+    return localStorage.getItem("jwtToken");
+  };
+  
+  /**
+   * Stores the provided JWT token.
+   * @param {string} token - The JWT token to store.
+   */
+  export const setAuthToken = (token) => {
+    localStorage.setItem("jwtToken", token);
+  };
+  
+  /**
+   * Clears the stored JWT token.
+   */
+  export const clearAuthToken = () => {
+    localStorage.removeItem("jwtToken");
+  };
 
-    try {
-        const decodedToken = JSON.parse(atob(token.split(".")[1])); // Decode JWT
-        const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-
-        return decodedToken.exp > currentTime; // Check if token is still valid
-    } catch (error) {
-        return false; // Token is invalid
-    }
-};
+  export const isTokenValid = () => {
+    const token = getAuthToken();
+    return !!(token && token.trim() !== "");
+  };

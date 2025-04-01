@@ -1,5 +1,5 @@
 // This file contains helper functions for poll-related API calls
-
+import { getVotingContract } from "../services/blockchain";
 // Function to get a list of polls with optional filtering via query parameters
 export const getPolls = async (filters = {}) => {
     // Build query string from filters (e.g., { title: "favorite", status: "active" })
@@ -80,3 +80,54 @@ export const getPolls = async (filters = {}) => {
   
     return response.json();
   };
+
+export const createPollOnChain = async (question, options) => {
+  const contract = await getVotingContract();
+  if (!contract) throw new Error("Voting contract is not available");
+  // Send the transaction
+  const tx = await contract.createPoll(question, options);
+  // Wait for the transaction to be mined
+  const receipt = await tx.wait();
+  console.log("Poll created on-chain. Receipt:", receipt);
+  return receipt;
+};
+
+// Function to cast a vote through your backend
+export const voteOnPoll = async (pollId, optionIndex, token) => {
+  const response = await fetch('http://localhost:5003/polls/vote', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // Pass JWT token for authentication if required
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ pollId, optionIndex }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Voting failed');
+  }
+
+  return response.json();
+};
+
+// src/api/polls.js
+export const voteOnPollBackend = async (pollId, optionIndex, token) => {
+  const response = await fetch('http://localhost:5003/polls/vote', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // Include the JWT token in the Authorization header if required by your backend
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ pollId, optionIndex }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Voting failed');
+  }
+
+  return response.json();
+};
