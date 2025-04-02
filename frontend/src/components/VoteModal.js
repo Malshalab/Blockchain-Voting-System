@@ -9,6 +9,7 @@ const VoteModal = ({ isOpen, closeModal, poll, onVoteSuccess }) => {
   const candidatesPerColumn = 8;
   const candidateColumns = chunk(poll.options, candidatesPerColumn);
   const [numColumns, setNumColumns] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setNumColumns(Math.min(3, Math.ceil(poll.options.length / 8)));
@@ -29,17 +30,20 @@ const handleVote = async () => {
       return;
     }
     try {
+      setIsLoading(true)
       // Retrieve the JWT token from localStorage using the correct key
       const token = localStorage.getItem("token");
       if (!token) {
         alert("User not authenticated. Please log in.");
+        setIsLoading(false)
         return;
       }
       
       // Use the onChainPollId from the poll data
       const pollId = poll.onChainPollId;
       // Convert candidate's optionId (assumed 1-based) to a 0-based index:
-      const optionIndex = selectedCandidate.optionId ? parseInt(selectedCandidate.optionId, 10) - 1 : null;
+      console.log('Selected candidate:', selectedCandidate);
+      const optionIndex = selectedCandidate.optionId ? parseInt(selectedCandidate.optionId, 0) : null;
       
       if (!pollId || optionIndex === null || isNaN(optionIndex)) {
         throw new Error("Poll ID and option index are required");
@@ -47,13 +51,14 @@ const handleVote = async () => {
       
       const result = await voteOnPollBackend(pollId, optionIndex, token);
       console.log("Vote successfully cast:", result);
-      alert("Vote successfully cast!");
       closeModal();
       
       if (onVoteSuccess) onVoteSuccess();
     } catch (error) {
       console.error("Error casting vote:", error);
       alert("Error casting vote. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -97,7 +102,7 @@ const handleVote = async () => {
                       <button
                         key={candidate.id}
                         className={`flex items-center w-full p-3 rounded-lg border ${
-                          selectedCandidate && selectedCandidate.id === candidate.id
+                          selectedCandidate && selectedCandidate.optionId === candidate.optionId
                             ? "border-blue-500 bg-blue-100"
                             : "border-gray-300"
                         } hover:bg-gray-100 transition`}
@@ -121,7 +126,7 @@ const handleVote = async () => {
                   Cancel
                 </button>
                 <button onClick={handleVote} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                  Submit Vote
+                  {isLoading ? "Submitting..." : "Submit Vote"}
                 </button>
               </div>
             </Dialog.Panel>

@@ -29,11 +29,18 @@ export interface Poll {
   onChainPollId: number;    // Poll ID on the blockchain
 }
 
+interface PollResult {
+  label: string;
+  optionId: string;
+  votes: number;
+}
+
+
 const Dashboard: React.FC = () => {
   const [polls, setPolls] = useState<Poll[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedPoll, setSelectedPoll] = useState<Poll | null>(null);
-  const [pollResults, setPollResults] = useState<number[]>([]);
+  const [pollResults, setPollResults] = useState<PollResult[]>([]);
 
   // Fetch poll data from the backend and transform each poll so that _id becomes id and voteCounts is defined.
   useEffect(() => {
@@ -93,8 +100,14 @@ const Dashboard: React.FC = () => {
     try {
       console.log("Fetching vote results for poll:", poll.title);
       const result = await getPollVotesBackend(poll.onChainPollId);
-      console.log("Fetched poll results (raw):", result.votes);
-      setPollResults(result.votes.map(Number));
+      console.log("Fetched poll results (raw):", result);
+      // Map the received results to our PollResult interface.
+      const transformedResults = result.results.map((item: any) => ({
+        label: item.label,
+        optionId: item.optionId,
+        votes: Number(item.votes)
+      }));
+      setPollResults(transformedResults);
     } catch (error) {
       console.error("Error fetching poll results:", error);
       setPollResults([]);
@@ -237,18 +250,18 @@ const Dashboard: React.FC = () => {
                   ))}
                 </select>
                 {selectedPoll ? (
-                  pollResults.length > 0 ? (
+                  pollResults.some(result => result.votes > 0) ? (
                     <ResponsiveContainer width="100%" height={300}>
                       <PieChart>
                         <Pie
-                          data={voteChartData}
-                          dataKey="value"
-                          nameKey="name"
+                          data={pollResults}
+                          dataKey="votes"
+                          nameKey="label"
                           outerRadius={100}
                           fill="#8884d8"
                           label
                         >
-                          {voteChartData.map((_, index) => (
+                          {pollResults.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={donutColors[index % donutColors.length]} />
                           ))}
                         </Pie>

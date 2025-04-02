@@ -170,3 +170,19 @@ export const getPollVotesBackend = async (pollId) => {
   }
   return response.json();
 };
+
+export const getTotalVotes = async () => {
+  const response = await fetch(`http://localhost:5003/polls/totalVotesOverTime`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      // Include Authorization header if needed:
+      // Authorization: `Bearer ${localStorage.getItem("token")}`
+    },
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || "Failed to get total votes");
+  }
+  return response.json();
+}

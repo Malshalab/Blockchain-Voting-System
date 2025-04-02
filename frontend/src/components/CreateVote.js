@@ -12,6 +12,7 @@ const CreateVote = ({ isOpen, closeModal }) => {
   const [expiryTime, setExpiryTime] = useState("");
   const [candidates, setCandidates] = useState([{ id: 1, name: "", image: null }]);
   const [polls, setPolls] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const candidatesPerColumn = 8;
   const numColumns = Math.ceil(candidates.length / candidatesPerColumn);
@@ -82,6 +83,20 @@ const CreateVote = ({ isOpen, closeModal }) => {
       return;
     }
 
+    const duplicatePoll = polls.find(
+      (poll) => poll.title.toLowerCase() === title.trim().toLowerCase()
+    );
+    if (duplicatePoll) {
+      alert("A poll with that title already exists. Please choose a different title.");
+      return;
+    }
+
+    if(candidates.length < 2) {
+      alert("Please add at least 2 candidates.");
+      return;
+    }
+
+
     const startISO = new Date().toISOString();
     // Combine expiryDate and expiryTime into an ISO-formatted string.
     const expiryLocal = new Date(`${expiryDate}T${expiryTime}`);
@@ -104,6 +119,7 @@ const CreateVote = ({ isOpen, closeModal }) => {
     };
 
     try {
+      setIsLoading(true);
       // Retrieve the JWT token from localStorage if your endpoint is protected.
       const token = localStorage.getItem("token");
       if (!token) {
@@ -129,6 +145,8 @@ const CreateVote = ({ isOpen, closeModal }) => {
     } catch (error) {
       console.error("Error during poll creation:", error);
       alert("Error creating poll. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -261,7 +279,7 @@ const CreateVote = ({ isOpen, closeModal }) => {
                   + Add Candidate
                 </button>
                 <button onClick={handleCreateVote} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                  Create Poll
+                  {isLoading ? "Creating Poll..." : "Create Poll"}
                 </button>
               </div>
             </Dialog.Panel>

@@ -68,7 +68,7 @@ const Sidebar = () => {
             <div className="flex items-center space-x-3">
               <FaUserCircle className="text-gray-700 text-3xl" />
               <div>
-                <p className="text-gray-800 font-semibold">{userData.name}</p>
+                <p className="text-gray-800 font-semibold">{userData.name ? userData.name : userData.email.split("@")[0]}</p>
               </div>
             </div>
             <button

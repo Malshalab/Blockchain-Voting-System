@@ -10,9 +10,9 @@ const TopBar = ({ title }) => {
 
   useEffect(() => {
     const savedWallet = localStorage.getItem("walletAddress");
-    if (savedWallet) {
-      setWalletAddress(savedWallet);
-    }
+      if (savedWallet && savedWallet !== "undefined") {
+        setWalletAddress(savedWallet);
+      }
   }, []);
 
   const handleWalletConnect = async () => {
@@ -41,7 +41,7 @@ const TopBar = ({ title }) => {
       <div>
         <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
         {user ? (
-          <p className="text-sm text-gray-600">Welcome, {user.name}!</p>
+          <p className="text-sm text-gray-600">Welcome, {user.name ? user.name : user.email.split("@")[0]}!</p>
         ) : (
           <p className="text-sm text-gray-600">Not Logged In</p>
         )}
